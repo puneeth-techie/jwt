@@ -58,4 +58,8 @@ const refreshToken = (req, res, next) => {
   res.send("RT route");
 };
 
-export { register, login, logout, refreshToken };
+const getProfile = (req, res, next) => {
+  res.send("Now in protected route.");
+};
+
+export { register, login, logout, refreshToken, getProfile };
