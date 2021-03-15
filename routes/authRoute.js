@@ -2,7 +2,7 @@ import {
   register,
   login,
   logout,
-  refreshToken,
+  refreshAuthToken,
   getProfile,
 } from "../controllers/authController.js";
 import { protect } from "../middlewares/authCheck.js";
@@ -14,6 +14,6 @@ router.route("/register").post(register);
 router.route("/login").post(login);
 router.route("/logout").delete(logout);
 router.route("/profile").get(protect, getProfile);
-router.route("/refreshToken").post(refreshToken);
+router.route("/refreshToken").post(refreshAuthToken);
 
 export default router;

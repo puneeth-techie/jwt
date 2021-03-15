@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
-import generateToken from "../utils/generateToken.js";
+import { generateToken, refreshToken } from "../utils/generateToken.js";
+import verifyToken from "../middlewares/verifyToken.js";
 import createError from "http-errors";
 import { validateUserSchema } from "../utils/validateSchema.js";
 
@@ -18,6 +19,7 @@ const register = async (req, res, next) => {
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
+      rToken: refreshToken(user._id),
     });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
@@ -38,10 +40,12 @@ const login = async (req, res, next) => {
       throw createError.Unauthorized("Invalid email and password.");
     } else {
       const token = generateToken(user._id);
+      const rToken = refreshToken(user._id);
       res.status(201).json({
         Success: {
           message: "Successfully logged in.",
           token: token,
+          rToken: rToken,
         },
       });
     }
@@ -54,12 +58,26 @@ const logout = (req, res, next) => {
   res.send("Logout route");
 };
 
-const refreshToken = (req, res, next) => {
-  res.send("RT route");
+const refreshAuthToken = async (req, res, next) => {
+  const { rToken } = req.body;
+  try {
+    const user = await verifyToken(rToken);
+    if (!user) throw createError.Unauthorized();
+    const token = generateToken(user._id);
+    const refToken = refreshToken(user._id);
+    res.json({
+      tokens: {
+        accessToken: token,
+        refreshToken: refToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const getProfile = (req, res, next) => {
   res.send("Now in protected route.");
 };
 
-export { register, login, logout, refreshToken, getProfile };
+export { register, login, logout, refreshAuthToken, getProfile };
